@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LUMINA — Curated Essentials for Modern Living</title>
+  <meta name="description" content="A curated online storefront featuring premium acoustics, workspace objects, minimalist apparel, and handcrafted home goods.">
+  
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Leaflet Map for Pakistan Warehouses -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZS5BkAv8de7UA4oIc2Z5t74BB1w=" crossorigin=""></script>
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <div class="top-bar">
+    <span>Free Express Worldwide Shipping on orders over $100 ✦ Use code <strong>LUMINA20</strong> for 20% off</span>
+    <span style="display: inline-flex; align-items: center; gap: 0.75rem;">
+      <a onclick="document.getElementById('promoCodeInput')?.focus(); toggleCartDrawer(true);">Apply Code Now</a>
+      <span id="backendStatusIndicator" class="status-pill" title="Checking backend connection...">
+        <span class="status-dot"></span> Backend Live
+      </span>
+    </span>
+  </div>
+
+  <!-- Sticky Main Header -->
+  <header class="site-header">
+    <div class="container">
+      <div class="nav-wrapper">
+        
+        <!-- Brand Logo -->
+        <a href="#" class="brand-logo">
+          <div class="logo-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          </div>
+          <span>LUMINA</span>
+          <span class="tag">Studio</span>
+        </a>
+
+        <!-- Live Instant Search Bar -->
+        <div class="search-container">
+          <div class="search-input-wrapper">
+            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="searchInput" class="search-input" placeholder="Search headphones, keyboards, wool, pottery...">
+            <span class="search-shortcut">Ctrl+K</span>
+          </div>
+        </div>
+
+        <!-- Navigation Action Buttons -->
+        <div class="nav-actions">
+          
+          <!-- Theme Toggle -->
+          <button id="themeToggleBtn" class="icon-btn" title="Toggle Dark/Light Mode" aria-label="Toggle theme">
+            <!-- Icon injected via JS -->
+          </button>
+
+          <!-- Wishlist Button -->
+          <button id="wishlistTriggerBtn" class="icon-btn" title="Wishlist" aria-label="Saved items">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+            <span id="wishlistCountBadge" class="badge-count" style="display: none;">0</span>
+          </button>
+
+          <!-- Cart Trigger Button -->
+          <button id="cartTriggerBtn" class="icon-btn" title="Shopping Bag" aria-label="Shopping bag">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <path d="M16 10a4 4 0 0 1-8 0"></path>
+            </svg>
+            <span id="cartCountBadge" class="badge-count" style="display: none;">0</span>
+          </button>
+
+          <!-- User / Login Button -->
+          <button id="userAuthBtn" class="icon-btn" onclick="openAuthModal()" title="Login / Account" aria-label="Login">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <span id="userNameBadge" class="user-name-badge" style="display:none;"></span>
+          </button>
+
+          <!-- Store Operations / Admin Trigger (Owner only) -->
+          <button id="adminTriggerBtn" class="icon-btn" onclick="openAdminModal()" title="Store Operations (Owner Login Required)" aria-label="Store Admin" style="display:none;">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+          </button>
+
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="container">
+      <div class="hero-grid">
+        
+        <!-- Left Hero Content -->
+        <div class="hero-content">
+          <div class="hero-pill">
+            <span class="hero-pill-indicator"></span>
+            <span>Autumn/Winter '26 Collection Just Dropped</span>
+          </div>
+          
+          <h1 class="hero-title">
+            Curated Goods for <br>
+            <span class="gradient-text">Intentional Living.</span>
+          </h1>
+          
+          <p class="hero-desc">
+            Discover precision-engineered acoustics, warm ergonomic workspace objects, and tactile apparel crafted from honest, sustainable materials.
+          </p>
+          
+          <div class="hero-cta-group">
+            <a href="#catalog" class="btn-primary">
+              <span>Explore Collection</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </a>
+            <button class="btn-secondary" onclick="openQuickView(1)">
+              <span>Featured Spotlight</span>
+            </button>
+          </div>
+
+          <!-- Trust Badges & Stats -->
+          <div class="hero-stats">
+            <div class="stat-item">
+              <h4>4.9 / 5.0</h4>
+              <p>12,400+ Verified Reviews</p>
+            </div>
+            <div class="stat-item">
+              <h4>100%</h4>
+              <p>Carbon Neutral Delivery</p>
+            </div>
+            <div class="stat-item">
+              <h4>30-Day</h4>
+              <p>Risk-Free Home Trial</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Hero Floating Showcase -->
+        <div class="hero-showcase">
+          <div class="hero-card">
+            <div class="hero-card-img-wrapper">
+              <span class="hero-card-badge">Staff Pick • Limited Edition</span>
+              <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&auto=format&fit=crop&q=80" alt="Aura Studio Headphones">
+              
+              <!-- Floating Pill Badge -->
+              <div class="hero-card-floating">
+                <div class="floating-avatar-group">
+                  <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Customer">
+                  <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80" alt="Customer">
+                  <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&auto=format&fit=crop&q=80" alt="Customer">
+                </div>
+                <div>
+                  <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-main);">Bought by 480+ people</div>
+                  <div style="font-size: 0.7rem; color: var(--accent-emerald); font-weight: 600;">★ 4.9 Average Score</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hero-card-info">
+              <div class="hero-card-header">
+                <div>
+                  <h3>Aura Studio Wireless ANC</h3>
+                  <p style="font-size: 0.8rem; color: var(--text-muted);">Acoustic memory foam & aerospace aluminum</p>
+                </div>
+                <span class="price">$279</span>
+              </div>
+              <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+                <button class="btn-primary" style="flex: 1;" onclick="addToCart(1)">Quick Add to Bag</button>
+                <button class="btn-secondary" onclick="openQuickView(1)">Details</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Category Quick Filter Strip -->
+  <section class="category-strip-section" id="catalog">
+    <div class="container">
+      <div class="category-pills">
+        <button class="category-btn active" data-category="all">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          All Items
+        </button>
+        <button class="category-btn" data-category="tech">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="6" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>
+          Audio & Tech
+        </button>
+        <button class="category-btn" data-category="workspace">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></line><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+          Workspace
+        </button>
+        <button class="category-btn" data-category="home">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          Home & Living
+        </button>
+        <button class="category-btn" data-category="apparel">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          Apparel
+        </button>
+        <button class="category-btn" data-category="accessories">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="7"></circle><polyline points="12 9 12 12 13.5 13.5"></polyline><path d="M16.51 17.35l-.35 3.83a2 2 0 0 1-2 1.82H9.83a2 2 0 0 1-2-1.82l-.35-3.83m.01-10.7l.35-3.83A2 2 0 0 1 9.83 1h4.35a2 2 0 0 1 2 1.82l.35 3.83"></path></svg>
+          Accessories
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Product Showcase Section -->
+  <main class="container">
+    
+    <!-- Filter, Count & Sort Controls -->
+    <div class="filter-bar">
+      <div class="results-count" id="resultsCount">
+        Showing <strong>12</strong> items
+      </div>
+
+      <div class="filter-controls">
+        <label class="toggle-chip">
+          <input type="checkbox" id="inStockOnly">
+          <span>In Stock Only</span>
+        </label>
+
+        <select id="sortBySelect" class="sort-select" aria-label="Sort products">
+          <option value="featured">Featured First</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="rating">Customer Rating</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Product Grid -->
+    <section class="products-grid" id="productsGrid">
+      <!-- Populated dynamically via app.js -->
+    </section>
+
+  </main>
+
+  <!-- Value Propositions Banner -->
+  <section class="features-section">
+    <div class="container">
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="1" y="3" width="15" height="13"></rect>
+              <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+              <circle cx="5.5" cy="18.5" r="2.5"></circle>
+              <circle cx="18.5" cy="18.5" r="2.5"></circle>
+            </svg>
+          </div>
+          <div>
+            <h4>Express Free Shipping</h4>
+            <p>Complimentary climate-neutral tracked delivery on orders above $100.</p>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <div>
+            <h4>2-Year Full Warranty</h4>
+            <p>Precision guaranteed with our comprehensive manufacturer repair pledge.</p>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+          </div>
+          <div>
+            <h4>30-Day Hassle-Free Returns</h4>
+            <p>Not completely in love? Return it in original condition for a full refund.</p>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+              <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+          </div>
+          <div>
+            <h4>100% Plastic-Free</h4>
+            <p>Every parcel arrives in recycled, biodegradable unbleached cardboard packaging.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Social Proof / Customer Testimonials -->
+  <section class="testimonials-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-subtitle">Real Impressions</span>
+        <h2 class="section-title">Loved by Intentional Creators</h2>
+        <div style="margin-top: 1rem;">
+          <button class="btn-secondary" onclick="openReviewModal()" style="font-size: 0.85rem; padding: 0.5rem 1.25rem;">
+            ✦ Share Your Experience
+          </button>
+        </div>
+      </div>
+
+      <div class="testimonials-grid" id="testimonialsContainer">
+        <!-- Rendered via app.js -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter Signup Card -->
+  <div class="container">
+    <section class="newsletter-section">
+      <div class="newsletter-content">
+        <h3>Join the Lumina Collective</h3>
+        <p>Subscribe for quiet product releases, design essays, and receive an instant <strong>20% off voucher</strong> code for your first purchase.</p>
+        
+        <form class="newsletter-form" id="newsletterForm">
+          <input type="email" id="newsletterEmail" class="newsletter-input" required placeholder="Enter your email address...">
+          <button type="submit" class="btn-primary" style="white-space: nowrap;">Get 20% Off</button>
+        </form>
+      </div>
+    </section>
+  </div>
+
+  <!-- Pakistan Warehouse Network Map -->
+  <section class="warehouse-map-section" id="warehouses">
+    <div class="container">
+      <div class="section-header" style="text-align:center; margin-bottom: 2rem;">
+        <span class="section-subtitle">Nationwide Fulfillment</span>
+        <h2 class="section-title">Our Warehouses Across Pakistan</h2>
+        <p style="color: var(--text-muted); max-width: 560px; margin: 0.5rem auto 0;">Real-time stock &amp; pickup locations in major cities — Karachi, Lahore, Islamabad, Peshawar, Multan, Faisalabad, Quetta &amp; Rawalpindi.</p>
+      </div>
+      <div class="warehouse-layout">
+        <div id="pakistanMap" class="pakistan-map"></div>
+        <div class="warehouse-list" id="warehouseList">
+          <p style="color: var(--text-muted); padding: 1rem;">Loading warehouse network…</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#" class="brand-logo">
+            <div class="logo-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            </div>
+            <span>LUMINA</span>
+          </a>
+          <p>Carefully designed and curated objects for the thoughtful home, creative workspace, and everyday life.</p>
+        </div>
+
+        <div class="footer-column">
+          <h5>Catalog</h5>
+          <ul>
+            <li><a href="#catalog" onclick="state.activeCategory='tech'; filterAndSortProducts()">Audio & Acoustics</a></li>
+            <li><a href="#catalog" onclick="state.activeCategory='workspace'; filterAndSortProducts()">Desk & Workspace</a></li>
+            <li><a href="#catalog" onclick="state.activeCategory='home'; filterAndSortProducts()">Handcrafted Living</a></li>
+            <li><a href="#catalog" onclick="state.activeCategory='apparel'; filterAndSortProducts()">Merino Apparel</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h5>Company</h5>
+          <ul>
+            <li><a href="#">Our Design Philosophy</a></li>
+            <li><a href="#">Sustainability Report</a></li>
+            <li><a href="#">Artisan Cooperatives</a></li>
+            <li><a href="#">Journal & Editorial</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h5>Customer Care</h5>
+          <ul>
+            <li><a href="javascript:void(0)" onclick="openTrackOrderModal()">Track Your Shipment</a></li>
+            <li><a href="javascript:void(0)" onclick="openConciergeModal('Returns & Exchanges')">Returns & Exchanges</a></li>
+            <li><a href="javascript:void(0)" onclick="openConciergeModal('Lifetime Guarantee')">Lifetime Guarantee</a></li>
+            <li><a href="javascript:void(0)" onclick="openConciergeModal('Product Advice & Support')">Contact Concierge</a></li>
+            <li><a href="javascript:void(0)" onclick="openAdminModal()" style="color: var(--brand-primary); font-weight: 700;">✦ Store Manager & Admin</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 LUMINA Studio Inc. All rights reserved. Designed with intention.</div>
+        <div class="payment-icons">
+          <span>VISA</span> • <span>MASTERCARD</span> • <span>AMEX</span> • <span>APPLE PAY</span> • <span>PAYPAL</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- =========================================================================
+       INTERACTIVE CART SLIDE-OVER DRAWER
+       ========================================================================= -->
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="cart-drawer" id="cartDrawer" aria-label="Shopping Cart">
+    
+    <!-- Drawer Header -->
+    <div class="drawer-header">
+      <div class="drawer-title">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <path d="M16 10a4 4 0 0 1-8 0"></path>
+        </svg>
+        <span>Your Shopping Bag</span>
+      </div>
+      <button class="icon-btn" id="closeCartDrawerBtn" title="Close bag">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Free Shipping Progress Tracker -->
+    <div class="shipping-progress-banner">
+      <div class="shipping-text" id="shippingProgressText">
+        Add <strong>$100.00</strong> more for Free Shipping
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="shippingProgressFill" style="width: 0%;"></div>
+      </div>
+    </div>
+
+    <!-- Cart Item List -->
+    <div class="drawer-body">
+      <div class="cart-items-list" id="cartDrawerItems">
+        <!-- Rendered via app.js -->
+      </div>
+    </div>
+
+    <!-- Drawer Footer -->
+    <div class="drawer-footer">
+      <!-- Promo Code Input -->
+      <div class="promo-box">
+        <input type="text" id="promoCodeInput" class="promo-input" placeholder="Promo code (e.g. LUMINA20)">
+        <button class="promo-btn" onclick="applyPromoCode()">Apply</button>
+      </div>
+
+      <!-- Financial Totals -->
+      <div class="cart-summary-line">
+        <span>Subtotal</span>
+        <span id="cartSubtotal" style="font-weight: 700; color: var(--text-main);">$0.00</span>
+      </div>
+      <div class="cart-summary-line" id="cartDiscountRow" style="display: none; color: var(--accent-emerald);">
+        <span>Discount Voucher</span>
+        <span id="cartDiscount" style="font-weight: 700;">-$0.00</span>
+      </div>
+      <div class="cart-summary-line">
+        <span>Estimated Delivery</span>
+        <span id="cartShipping" style="font-weight: 700; color: var(--text-main);">Calculated</span>
+      </div>
+      <div class="cart-summary-line total">
+        <span>Total</span>
+        <span id="cartTotal">$0.00</span>
+      </div>
+
+      <button class="btn-primary btn-checkout" id="cartCheckoutBtn" onclick="openCheckoutModal()">
+        Proceed to Checkout →
+      </button>
+    </div>
+  </aside>
+
+  <!-- =========================================================================
+       QUICK VIEW MODAL
+       ========================================================================= -->
+  <div class="modal-backdrop" id="quickViewModal">
+    <div class="modal-card">
+      <button class="modal-close-btn" onclick="closeModal('quickViewModal')" title="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <div id="quickViewContent">
+        <!-- Injected via app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       WISHLIST MODAL
+       ========================================================================= -->
+  <div class="modal-backdrop" id="wishlistModal">
+    <div class="modal-card" style="max-width: 560px; padding: 2rem;">
+      <button class="modal-close-btn" onclick="closeModal('wishlistModal')" title="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <h3 style="font-size: 1.35rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="var(--accent-rose)" stroke="var(--accent-rose)" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+        Saved to Wishlist
+      </h3>
+      <div id="wishlistItemsList" style="margin-top: 1.5rem;">
+        <!-- Injected via app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       CHECKOUT MODAL (CONNECTED TO BACKEND ORDERS API)
+       ========================================================================= -->
+  <div class="modal-backdrop" id="checkoutModal">
+    <div class="modal-card checkout-modal-card">
+      <button class="modal-close-btn" onclick="closeModal('checkoutModal')" title="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="checkout-steps">
+        <div class="checkout-step active" id="stepIndicator1">
+          <span class="step-num">1</span>
+          <span>Delivery Details</span>
+        </div>
+        <div class="checkout-step" id="stepIndicator2">
+          <span class="step-num">2</span>
+          <span>Payment</span>
+        </div>
+        <div class="checkout-step" id="stepIndicator3">
+          <span class="step-num">3</span>
+          <span>Receipt</span>
+        </div>
+      </div>
+
+      <div id="checkoutStepContainer">
+        <!-- Rendered via app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       ORDER TRACKING MODAL (CONNECTED TO BACKEND)
+       ========================================================================= -->
+  <div class="modal-backdrop" id="trackOrderModal">
+    <div class="modal-card" style="max-width: 640px; padding: 2.25rem;">
+      <button class="modal-close-btn" onclick="closeModal('trackOrderModal')" title="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+        <div style="width: 38px; height: 38px; border-radius: var(--radius-md); background: var(--brand-primary-light); color: var(--brand-primary); display: flex; align-items: center; justify-content: center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="1" y="3" width="15" height="13"></rect>
+            <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+            <circle cx="5.5" cy="18.5" r="2.5"></circle>
+            <circle cx="18.5" cy="18.5" r="2.5"></circle>
+          </svg>
+        </div>
+        <div>
+          <h3 style="font-size: 1.35rem; font-weight: 800; color: var(--text-main);">Live Shipment Tracker</h3>
+          <p style="font-size: 0.825rem; color: var(--text-muted);">Real-time tracking backed by our SQLite server database</p>
+        </div>
+      </div>
+
+      <form id="trackingLookupForm" onsubmit="event.preventDefault(); trackOrderSubmit();" style="margin: 1.25rem 0;">
+        <div style="display: flex; gap: 0.5rem;">
+          <input type="text" id="trackingOrderInput" class="form-input" required placeholder="Enter Order # (e.g. LUM-742918) or email" style="height: 46px; font-weight: 600;">
+          <button type="submit" id="trackingSubmitBtn" class="btn-primary" style="height: 46px; white-space: nowrap; padding: 0 1.5rem;">
+            Track Order
+          </button>
+        </div>
+      </form>
+
+      <div id="trackingResultContainer">
+        <!-- Rendered via app.js -->
+        <div style="text-align: center; padding: 2rem 1rem; color: var(--text-muted); font-size: 0.875rem;">
+          Enter your order confirmation number above to check shipment milestones and delivery status.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       STUDIO CONCIERGE / CONTACT MODAL
+       ========================================================================= -->
+  <div class="modal-backdrop" id="conciergeModal">
+    <div class="modal-card" style="max-width: 560px; padding: 2.25rem;">
+      <button class="modal-close-btn" onclick="closeModal('conciergeModal')" title="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <h3 style="font-size: 1.35rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.25rem;">Studio Concierge</h3>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Direct inquiry connection with our support desk</p>
+
+      <form id="conciergeForm" onsubmit="event.preventDefault(); submitConciergeMessage();">
+        <div class="form-grid">
+          <div>
+            <label class="form-label">Full Name *</label>
+            <input type="text" id="conciergeName" class="form-input" required placeholder="Alex Rivers">
+          </div>
+          <div>
+            <label class="form-label">Email Address *</label>
+            <input type="email" id="conciergeEmail" class="form-input" required placeholder="alex@domain.com">
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Subject</label>
+            <input type="text" id="conciergeSubject" class="form-input" required value="Product Advice & Sizing Support">
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Your Message *</label>
+            <textarea id="conciergeMessage" class="form-input" required rows="4" style="height: auto; padding: 0.75rem;" placeholder="How can our concierge assist with your space or order?"></textarea>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem;">
+          <button type="button" class="btn-secondary" style="flex: 1;" onclick="closeModal('conciergeModal')">Cancel</button>
+          <button type="submit" id="conciergeSubmitBtn" class="btn-primary" style="flex: 2;">Send Message to Concierge</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       CUSTOMER REVIEW / TESTIMONIAL MODAL
+       ========================================================================= -->
+  <div class="modal-backdrop" id="reviewModal">
+    <div class="modal-card" style="max-width: 560px; padding: 2.25rem;">
+      <button class="modal-close-btn" onclick="closeModal('reviewModal')" title="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <h3 style="font-size: 1.35rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.25rem;">Share Your Experience</h3>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Your review will appear in the verified customer testimonials section</p>
+
+      <form id="reviewForm" onsubmit="event.preventDefault(); submitReview();">
+        <div class="form-grid">
+          <div>
+            <label class="form-label">Your Name *</label>
+            <input type="text" id="reviewAuthor" class="form-input" required placeholder="Marcus Vance">
+          </div>
+          <div>
+            <label class="form-label">Role or Location *</label>
+            <input type="text" id="reviewRole" class="form-input" required placeholder="Architect, Chicago">
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Product Reviewed *</label>
+            <select id="reviewProduct" class="form-input" required style="cursor: pointer;">
+              <!-- Populated dynamically via app.js -->
+            </select>
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Rating (1 to 5 Stars)</label>
+            <select id="reviewRating" class="form-input" style="cursor: pointer;">
+              <option value="5">★★★★★ (5/5 Exceptional)</option>
+              <option value="4">★★★★☆ (4/5 Great Quality)</option>
+              <option value="3">★★★☆☆ (3/5 Average)</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Your Review *</label>
+            <textarea id="reviewText" class="form-input" required rows="3" style="height: auto; padding: 0.75rem;" placeholder="Describe what made this product special for your workspace or home..."></textarea>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem;">
+          <button type="button" class="btn-secondary" style="flex: 1;" onclick="closeModal('reviewModal')">Cancel</button>
+          <button type="submit" id="reviewSubmitBtn" class="btn-primary" style="flex: 2;">Publish Review</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       CUSTOMER & OWNER LOGIN / REGISTER MODAL
+       ========================================================================= -->
+  <div class="modal-backdrop" id="authModal">
+    <div class="modal-card" style="max-width: 440px; padding: 2rem;">
+      <button class="modal-close-btn" onclick="closeModal('authModal')" title="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div id="authLoggedOutView">
+        <div class="auth-tabs" style="display:flex; gap:0.5rem; margin-bottom:1.25rem;">
+          <button class="admin-tab-btn active" id="authTabLogin" onclick="switchAuthTab('login')">Login</button>
+          <button class="admin-tab-btn" id="authTabRegister" onclick="switchAuthTab('register')">Register</button>
+          <button class="admin-tab-btn" id="authTabOwner" onclick="switchAuthTab('owner')">Owner Login</button>
+        </div>
+
+        <!-- Customer Login -->
+        <form id="loginForm" onsubmit="event.preventDefault(); handleLogin('customer');" style="display:block;">
+          <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:0.5rem;">Customer Login</h3>
+          <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">Access order history &amp; faster checkout.</p>
+          <div class="form-group" style="margin-bottom:0.75rem;">
+            <label class="form-label">Email</label>
+            <input type="email" id="loginEmail" class="form-input" required placeholder="you@example.com" value="customer@example.com">
+          </div>
+          <div class="form-group" style="margin-bottom:1rem;">
+            <label class="form-label">Password</label>
+            <input type="password" id="loginPassword" class="form-input" required placeholder="••••••••" value="Customer1">
+          </div>
+          <button type="submit" class="btn-primary" style="width:100%;">Sign In</button>
+          <p id="loginError" style="color:#e11d48; font-size:0.85rem; margin-top:0.75rem; display:none;"></p>
+        </form>
+
+        <!-- Customer Register -->
+        <form id="registerForm" onsubmit="event.preventDefault(); handleRegister();" style="display:none;">
+          <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:0.5rem;">Create Account</h3>
+          <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">Join Lumina for exclusive offers.</p>
+          <div class="form-group" style="margin-bottom:0.75rem;">
+            <label class="form-label">Full Name</label>
+            <input type="text" id="regName" class="form-input" required placeholder="Your name">
+          </div>
+          <div class="form-group" style="margin-bottom:0.75rem;">
+            <label class="form-label">Email</label>
+            <input type="email" id="regEmail" class="form-input" required placeholder="you@example.com">
+          </div>
+          <div class="form-group" style="margin-bottom:0.75rem;">
+            <label class="form-label">Password (min 6)</label>
+            <input type="password" id="regPassword" class="form-input" required minlength="6" placeholder="••••••••">
+          </div>
+          <div class="form-group" style="margin-bottom:0.75rem;">
+            <label class="form-label">City (optional)</label>
+            <input type="text" id="regCity" class="form-input" placeholder="Lahore, Karachi…">
+          </div>
+          <button type="submit" class="btn-primary" style="width:100%;">Create Account</button>
+          <p id="regError" style="color:#e11d48; font-size:0.85rem; margin-top:0.75rem; display:none;"></p>
+        </form>
+
+        <!-- Owner Login -->
+        <form id="ownerLoginForm" onsubmit="event.preventDefault(); handleLogin('owner');" style="display:none;">
+          <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:0.5rem;">Owner Login</h3>
+          <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">Store Operations access only.</p>
+          <div class="form-group" style="margin-bottom:0.75rem;">
+            <label class="form-label">Owner Email</label>
+            <input type="email" id="ownerEmail" class="form-input" required placeholder="owner@lumina.pk" value="owner@lumina.pk">
+          </div>
+          <div class="form-group" style="margin-bottom:1rem;">
+            <label class="form-label">Password</label>
+            <input type="password" id="ownerPassword" class="form-input" required placeholder="••••••••" value="Owner@123">
+          </div>
+          <button type="submit" class="btn-primary" style="width:100%; background:var(--brand-primary);">Enter Store Operations</button>
+          <p id="ownerError" style="color:#e11d48; font-size:0.85rem; margin-top:0.75rem; display:none;"></p>
+          <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.75rem;">Demo: owner@lumina.pk / Owner@123</p>
+        </form>
+      </div>
+
+      <!-- Logged-in profile view -->
+      <div id="authLoggedInView" style="display:none;">
+        <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:0.5rem;">My Account</h3>
+        <div id="authProfileInfo" style="margin:1rem 0; padding:1rem; background:var(--bg-subtle); border-radius:var(--radius-md);"></div>
+        <div style="display:flex; flex-direction:column; gap:0.5rem;">
+          <button class="btn-secondary" onclick="loadMyOrders()" id="myOrdersBtn">My Orders</button>
+          <button class="btn-secondary" onclick="handleLogout()" style="color:#e11d48;">Logout</button>
+        </div>
+        <div id="myOrdersContainer" style="margin-top:1rem; display:none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       STORE OPERATIONS & BACKEND ADMIN DASHBOARD MODAL
+       ========================================================================= -->
+  <div class="modal-backdrop" id="adminModal">
+    <div class="modal-card" style="max-width: 920px; padding: 2.25rem;">
+      <button class="modal-close-btn" onclick="closeModal('adminModal')" title="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-subtle);">
+        <div>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <h3 style="font-size: 1.5rem; font-weight: 800; color: var(--text-main);">Store Operations & Backend</h3>
+            <span class="status-pill"><span class="status-dot"></span> SQLite Online</span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Manage real-time catalog stock, track incoming orders, and view subscribers</p>
+        </div>
+        <button class="btn-secondary" onclick="loadAdminDashboardData()" style="font-size: 0.8rem; padding: 0.4rem 0.85rem;">
+          ↻ Refresh Metrics
+        </button>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="admin-tabs">
+        <button class="admin-tab-btn active" onclick="switchAdminTab(this, 'adminTabOverview')">Overview & Metrics</button>
+        <button class="admin-tab-btn" onclick="switchAdminTab(this, 'adminTabOrders')">Orders Management</button>
+        <button class="admin-tab-btn" onclick="switchAdminTab(this, 'adminTabInventory')">Inventory Control</button>
+        <button class="admin-tab-btn" onclick="switchAdminTab(this, 'adminTabInquiries')">Subscribers & Concierge</button>
+      </div>
+
+      <div id="adminTabOverview">
+        <!-- Rendered via app.js -->
+      </div>
+      <div id="adminTabOrders" style="display: none;">
+        <!-- Rendered via app.js -->
+      </div>
+      <div id="adminTabInventory" style="display: none;">
+        <!-- Rendered via app.js -->
+      </div>
+      <div id="adminTabInquiries" style="display: none;">
+        <!-- Rendered via app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Application Scripts -->
+  <script src="js/products.js"></script>
+  <script src="products.js"></script>
+  <script src="js/app.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
